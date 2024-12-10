@@ -1,25 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:inventory_project/database/local_db.dart';
 
-class selectedProduct extends StatelessWidget {
-  const selectedProduct({super.key,});
+class DatabaseUserInterface extends StatelessWidget {
+  const DatabaseUserInterface({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Map passedPrdData = {};
-    passedPrdData = ModalRoute.of(context)!.settings.arguments as Map;
-    print('data extracted - $passedPrdData');
-
     var prdNameController = TextEditingController();
-    var prdQtyController = TextEditingController();
-    var prdPriceController = TextEditingController();
-    prdNameController.text = passedPrdData['prdName'];
-    prdQtyController.text = passedPrdData['prdQty'].toString();
-    prdPriceController.text = passedPrdData['prdPrice'].toString();
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text('Inventory'),
+        title: const Text('Database interface'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -36,13 +27,11 @@ class selectedProduct extends StatelessWidget {
                 TextField(
                   decoration:
                       const InputDecoration(hintText: 'Product Quantity'),
-                  controller: prdQtyController,
                   style: const TextStyle(color: Colors.black, fontSize: 12.0),
                 ),
                 const SizedBox(height: 20),
                 TextField(
                   decoration: const InputDecoration(hintText: 'Product Price'),
-                  controller: prdPriceController,
                   style: const TextStyle(color: Colors.black, fontSize: 12.0),
                 ),
                 const SizedBox(height: 20),
@@ -55,14 +44,20 @@ class selectedProduct extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     ElevatedButton(
-                        onPressed: () {
-                          Navigator.pop(context, {
-                            'prdName': prdNameController.text,
-                            'prdQty': prdQtyController.text,
-                            'prdPrice': prdPriceController.text,
-                          });
+                        onPressed: () async {
+                          await LocalDatabase()
+                              .addDataLocally(prdName: prdNameController.text);
                         },
-                        child: const Text('update product')),
+                        child: const Text('Save to database')),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        Navigator.pushNamed(context, '/home');
+                      },
+                        child: const Text('Show Product')),
+                    
                   ],
                 ),
               ]),

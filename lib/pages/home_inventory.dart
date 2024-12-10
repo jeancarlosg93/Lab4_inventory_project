@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:inventory_project/pages/selected_product.dart';
+import 'package:inventory_project/database/local_db.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -9,13 +9,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> prdNameList = <String>[
-    'Cookies',
-    'bread',
-    'Eggs',
-    'Meat',
-    'Wheat'
-  ];
+  // List<String> prdNameList = <String>[
+  //   'Cookies',
+  //   'bread',
+  //   'Eggs',
+  //   'Meat',
+  //   'Wheat'
+  // ];
+  List<String> prdNameList = <String>[];
+
   List<int> prdQtyList = <int>[5, 2, 3, 10, 7];
   List<double> prdPriceList = <double>[15.99, 12.99, 13.99, 10.99, 7.99];
   int currentProdIndex = -1;
@@ -34,10 +36,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // prdName = await Future.delayed(const Duration(seconds: 3), () {
     //   return ('Delayed');
     // });
-    //
-    // prdPrice = await Future.delayed(const Duration(seconds: 2), () {
-    //   print('product qty is 2');
-    // });
+
+    List prdNameListMap = await LocalDatabase().readAllData();
+    print(prdNameListMap);
+    int i = 0;
+    while (i < prdNameListMap.length) {
+      prdNameList.add(prdNameListMap[i]["prdName"]);
+      i++;
+    }
   }
 
   @override
@@ -94,24 +100,31 @@ class _MyHomePageState extends State<MyHomePage> {
                     const SizedBox(width: 20),
                     ElevatedButton(
                         onPressed: () async {
-                          
-                          //this is a map
-                          final updateProducts = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => selectedProduct(
-                                      prdName: prdNameList[currentProdIndex],
-                                      prdPrice: prdPriceList[currentProdIndex],
-                                      prdQty: prdQtyList[currentProdIndex])));
-                          
+                          // this is a map
+                          dynamic updateProducts = await Navigator.pushNamed(
+                              context, "/selection",
+                              arguments: {
+                                'prdName': prdNameList[currentProdIndex],
+                                'prdQty': prdQtyList[currentProdIndex],
+                                'prdPrice': prdPriceList[currentProdIndex],
+                              });
+
                           setState(() {
-                            prdName = updateProducts["prdName"];
-                            prdQty = updateProducts["prdQty"];
-                            prdPrice = updateProducts["prdPrice"];
-                            
-                            prdNameList[currentProdIndex] = prdName;
-                            prdPriceList[currentProdIndex] = prdPrice;
-                            prdQtyList[currentProdIndex] = prdQty;
+                            try {
+                              prdName = updateProducts["prdName"];
+                              prdQty = int.parse(updateProducts["prdQty"]);
+                              prdPrice =
+                                  double.parse(updateProducts["prdPrice"]);
+
+                              prdNameList[currentProdIndex] = prdName;
+                              prdPriceList[currentProdIndex] = prdPrice;
+                              prdQtyList[currentProdIndex] = prdQty;
+
+                              prdtotal = prdQty * prdPrice;
+                            } catch (e) {
+                              // Handle parsing errors
+                              print("Error updating product: $e");
+                            }
                           });
                         },
                         child: const Text('Edit product '
