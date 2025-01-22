@@ -23,15 +23,21 @@ class LocalDatabase {
     await db.execute('''
     CREATE TABLE Product(
     id INTEGER PRIMARY KEY,
-    prdName TEXT NOT NULL
+    prdName TEXT NOT NULL,
+    prdQty INTEGER NOT NULL DEFAULT 0,
+    prdPrice REAL NOT NULL DEFAULT 0.0
     )
     ''');
   }
 
-  Future addDataLocally({prdName}) async {
+  Future addDataLocally({prdName, prdQtY, prdPrice}) async {
     final db = await database;
-    await db.insert("Product", {"prdname": prdName});
-    print('$prdName added to database successfully');
+    await db.insert("Product", {
+      "prdName": prdName,
+      "prdQty": prdQtY ?? 0,
+      "prdPrice": prdPrice ?? 0.0
+    });
+    print('$prdName, $prdQtY. $prdPrice to database successfully');
     return 'added';
   }
 
@@ -41,5 +47,31 @@ class LocalDatabase {
     wholeDataList = allData;
     print(wholeDataList);
     return wholeDataList;
+  }
+
+  Future searchProductById({prdId}) async {
+    final db = await database;
+    final allSearchData = await db.rawQuery(
+        'SELECT id, prdName, prdQty, prdPrice FROM Product WHERE id = ?',
+        [prdId]);
+    print('product found is $allSearchData');
+    return allSearchData;
+  }
+
+  Future updateProduct({prdId, prdName, prdQty, prdPrice}) async {
+    final db = await database;
+    int updateId = await db.rawUpdate(
+        'UPDATE Product SET prdName=?, prdQty=?,prdPrice=? WHERE id = ?',
+        [prdName, prdQty, prdPrice, prdId]);
+    print('update is $updateId');
+    return updateId;
+  }
+
+  Future deleteProduct({prdId}) async {
+    final db = await database;
+    final deletedproduct =
+        await db.rawDelete('DELETE FROM Product WHERE id=?', [prdId]);
+    print('DeletedProduct with ID: $prdId');
+    return deletedproduct;
   }
 }

@@ -17,9 +17,8 @@ class _MyHomePageState extends State<MyHomePage> {
   //   'Wheat'
   // ];
   List<String> prdNameList = <String>[];
-
-  List<int> prdQtyList = <int>[5, 2, 3, 10, 7];
-  List<double> prdPriceList = <double>[15.99, 12.99, 13.99, 10.99, 7.99];
+  List<int> prdQtyList = <int>[];
+  List<double> prdPriceList = <double>[];
   int currentProdIndex = -1;
   int prdQty = 0;
   String prdName = '';
@@ -33,15 +32,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void getProductData() async {
-    // prdName = await Future.delayed(const Duration(seconds: 3), () {
-    //   return ('Delayed');
-    // });
-
     List prdNameListMap = await LocalDatabase().readAllData();
     print(prdNameListMap);
     int i = 0;
     while (i < prdNameListMap.length) {
       prdNameList.add(prdNameListMap[i]["prdName"]);
+      prdQtyList.add(prdNameListMap[i]["prdQty"]);
+      prdPriceList.add(prdNameListMap[i]["prdPrice"]);
       i++;
     }
   }
@@ -129,6 +126,19 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                         child: const Text('Edit product '
                             'details')),
+                    ElevatedButton(
+                        onPressed: () async {
+                          await Navigator.pushNamed(context, '/callwebservice');
+                        },
+                        child: const Text('Call Web Service')),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    ElevatedButton(
+                        onPressed: () async {
+                          await Navigator.pushNamed(context, '/');
+                        },
+                        child: const Text('Database User Interface')),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -145,7 +155,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'assets/dog1.jpg',
                   ),
                 ),
-                const SizedBox(width: 20),
+                const SizedBox(height: 20),
                 SizedBox(
                   height: 200,
                   child: Image.network(
